@@ -1,128 +1,138 @@
-namespace Actividad1Semana18;
-
-class Program
+using System;
+namespace Actividad1Semana18
 {
-    const int NumeroEstudiantes = 10;
-    const int NumeroNotas = 10;
-    const int NotaAprobar = 65;
-    static void Main()
+
+    class Program
     {
-
-        string[] nombreEstudiantes = new string[NumeroEstudiantes];
-        int[,] notas = new int[NumeroEstudiantes, NumeroNotas];
-
-        for(int i = 0; i < NumeroEstudiantes; i++)
+        static void Main()
         {
-            Console.WriteLine($"Nombre del estudiante #{i + 1}:");
-            nombreEstudiantes[i] = Console.ReadLine();
+            const int cantidadEstudiantes = 10;
+            const int cantidadNotas = 10;
 
-            for (int j = 0; j < NumeroNotas; j++)
+            Estudiante[] estudiantes = new Estudiante[cantidadEstudiantes];
+
+            for (int i = 0; i < cantidadEstudiantes; i++)
             {
-                notas[i, j] = LeerNotaValida(i + 1, j + 1);
-            }
-        }
+                Console.WriteLine($"Ingrese el nombre del estudiante #{i + 1}:");
+                string nombre = Console.ReadLine();
 
-        while(true)
-        {
-            Console.WriteLine("Seleccione alguna de las siguientes opciones: ");
-            Console.WriteLine("1) Mostrar nombre y notas aprobadas pde cada alumno");
-            Console.WriteLine("2) Mostrar nombre y notas no aprobadas de cada alumno");
-            Console.WriteLine("3) Mostrar el promedio de notas del grupo");
-            Console.WriteLine("4) Salir del programa");
-            string opcion = Console.ReadLine();
+                int[] notas = new int[cantidadNotas];
+
+                for (int j = 0; j < cantidadNotas; j++)
+                {
+                    notas[j] = LeerNotaValida(i + 1, j + 1);
+                }
+                estudiantes[i] = new Estudiante(nombre, notas);
+            }
             
-            switch (opcion)
+            while (true)
             {
-                case "1":
-                    MostrarNotas(nombreEstudiantes, notas, true);
-                    break;
-                case "2":
-                    MostrarNotas(nombreEstudiantes, notas, false);
-                    break;
-                case "3":
-                    Console.WriteLine($"Promedio del grupo: {MostrarPromedioGeneral(notas)}");
-                    break;
-                case "4":
-                    return;
-                default:
-                    Console.WriteLine("Opción inválida.");
-                    break;
+                Console.WriteLine("Seleccione una opción");
+                Console.WriteLine("1) Mostrar nombre y notas aprobadas de cada alumno");
+                Console.WriteLine("2) Mostrar nombre y notas no aprobadas de cada alumno");
+                Console.WriteLine("3) Mostrar el promedio de notas del grupo");
+                Console.WriteLine("4) Salir del programa");
+
+                int opcion = Convert.ToInt32(Console.ReadLine());
+
+                switch (opcion)
+                {
+                    case 1:
+                        Console.WriteLine("Notas aprobadas: ");
+                        for (int i = 0; i < estudiantes.Length; i++)
+                        {
+                            estudiantes[i].MostrarNotas(true);
+                        }
+                        break;
+
+                    case 2:
+                        Console.WriteLine("Notas reprobadas");
+                        for (int i = 0; i < estudiantes.Length; i++)
+                        {
+                            estudiantes[i].MostrarNotas(false);
+                        }
+                        break;
+                    case 3:
+                        double promedio = CalcularPromedioGeneral(estudiantes);
+                        Console.WriteLine("Promedio general del grupo: " + promedio.ToString("F2"));
+                        break;
+                    case 4:
+                        return;
+                    default:
+                        Console.WriteLine("Opción inválida. Intente nuevamente");
+                        break;
+                }
             }
         }
-
-        static int LeerNotaValida(int numeroEstudiante, int notaEstudiante)
+        
+        static int LeerNotaValida(int numeroEstudiante, int numeroNota)
         {
-            while(true)
+            while (true)
             {
-                Console.Write($"Nota del estudiante No. {numeroEstudiante}: {notaEstudiante} (0-100): ");
+                Console.Write("Ingrese la nota #" + numeroNota + " del estudiante #" + numeroEstudiante + " (0-100)");
                 string entrada = Console.ReadLine();
 
-                if (int.TryParse(entrada, out int nota))
+                int nota;
+                if (int.TryParse(entrada, out nota))
                 {
                     if (nota >= 0 && nota <= 100)
-                    { 
-                    return nota;
+                    {
+                        return nota;
                     }
                 }
-
+                
                 Console.WriteLine("Entrada inválida. Ingrese un número entre 0 y 100.");
             }
         }
-
-        static void MostrarNotas(string[] nombres, int[,] notas, bool aprobadas)
+    
+        static double CalcularPromedioGeneral(Estudiante[] estudiantes)
         {
-            if (aprobadas)
-                Console.WriteLine("\nAprobados:");
-            else
-                Console.WriteLine("\nReprobados:");
+            int suma = 0;
+            int totalNotas = 0;
 
-            for (int i = 0; i < NumeroEstudiantes; i++)
+            for (int i = 0; i < estudiantes.Length; i++)
+            {
+                for (int j = 0; j < estudiantes[i].Notas.Length;)
+                {
+                    suma += estudiantes[i].Notas[j];
+                    totalNotas++;
+                }
+            }
+            return (double)suma / totalNotas;
+        }
+    }
+
+        class Estudiante
+        {
+            public string Nombre;
+            public int[] Notas;
+            const int NotaMinimaAprobada = 65;
+            
+            public Estudiante(string nombre, int[] notas)
+            {
+                Nombre = nombre;
+                Notas = notas;
+            }
+            
+            public void MostrarNotas(bool aprobadas)
             {
                 int contador = 0;
 
-                for (int j = 0; j < NumeroNotas; j++)
+                for (int i = 0; i < Notas.Length; i++)
                 {
-                    bool Aprobada = notas[i, j] >= NotaAprobar;
-
-                    if (Aprobada == aprobadas)
+                    int nota = Notas[i];
+                    if (aprobadas && nota >= NotaMinimaAprobada)
                     {
                         contador++;
+                    } else if (!aprobadas && nota < NotaMinimaAprobada)
+                    { 
+                        contador++;    
                     }
+
                 }
-
-                string tipo;
-                if (aprobadas)
-                {
-                    tipo = "aprobadas";
-                }
-                else
-                {
-                    tipo = "reprobadas";
-                }
-
-                Console.WriteLine($"{nombres[i]} - {contador} nota(s) {tipo}");
-
-
-        }
-
-        static void MostrarPromedioGeneral(int[,] notas)
-        {
-            int suma = 0;
-            int total = NumeroEstudiantes * NumeroNotas;
-
-            for (int i = 0; i < NumeroEstudiantes; i++)
-            {
-                for (int j = 0; j < NumeroNotas; j++)
-                {
-                    suma += notas[i, j];
-                }
+                string tipo = aprobadas ? " aprobadas" : " reprobadas";
+                Console.WriteLine(Nombre + " - " + contador + " notas(s)" + tipo);
             }
-
-            double promedio = (double)suma / total;
-            Console.WriteLine($"\nPromedio general del grupo: {promedio:F2}");
-
+    
         }
-
-}
-}
 }
